@@ -1,8 +1,141 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "服务状态监控";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="text-center">系统服务状态监控面板</h1>
+            <p class="text-center text-muted">实时监控本地服务运行状态</p>
+        </div>
+    </div>
+
+    <div class="row" id="services-container">
+        <!-- 服务卡片将通过 JavaScript 动态加载 -->
+    </div>
 </div>
+
+@section Styles {
+    <style>
+        .service-card {
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .service-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-running {
+            color: #28a745;
+        }
+
+        .status-stopped {
+            color: #dc3545;
+        }
+
+        .status-unknown {
+            color: #ffc107;
+        }
+
+        .service-status {
+            font-weight: bold;
+        }
+
+        .last-checked {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .refresh-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .refresh-button i {
+            font-size: 1.2rem;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        function getServiceIcon(serviceName) {
+            const icons = {
+                'MySQL': 'database',
+                'Redis': 'server',
+                'Docker': 'box',
+                'Java': 'coffee',
+                'Python': 'code',
+                'Apache': 'globe'
+            };
+            return icons[serviceName] || 'question-circle';
+        }
+
+        function getStatusClass(isRunning) {
+            return isRunning ? 'status-running' : 'status-stopped';
+        }
+
+        function formatLastChecked(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-CN');
+        }
+
+        function createServiceCard(service) {
+            return `
+                <div class="col-md-4">
+                    <div class="card service-card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-${getServiceIcon(service.serviceName)} service-icon ${getStatusClass(service.isRunning)}"></i>
+                            <h5 class="card-title">${service.serviceName}</h5>
+                            <p class="card-text mb-1">
+                                版本: ${service.version}
+                            </p>
+                            <p class="service-status ${getStatusClass(service.isRunning)}">
+                                ${service.status}
+                            </p>
+                            <p class="last-checked">
+                                最后检查: ${formatLastChecked(service.lastChecked)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateServices() {
+            fetch('/Home/GetServicesStatus')
+                .then(response => response.json())
+                .then(services => {
+                    const container = document.getElementById('services-container');
+                    container.innerHTML = services.map(createServiceCard).join('');
+                })
+                .catch(error => console.error('获取服务状态失败:', error));
+        }
+
+        // 首次加载
+        updateServices();
+
+        // 每30秒自动刷新一次
+        setInterval(updateServices, 30000);
+    </script>
+}
+
+<!-- 刷新按钮 -->
+<button class="btn btn-primary refresh-button" onclick="updateServices()">
+    <i class="bi bi-arrow-clockwise"></i>
+</button>

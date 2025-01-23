@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Localization;
 using MyWebApp.Models;
+using System.Text.RegularExpressions;
 
 namespace MyWebApp.Controllers;
 
@@ -19,7 +20,7 @@ public class HomeController : Controller
     {
         if (string.IsNullOrEmpty(culture))
         {
-            culture = "en-US"; // 默认文化
+            culture = "en-US";
         }
 
         Response.Cookies.Append(
@@ -34,6 +35,266 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         return View();
+    }
+
+    [HttpGet]
+    public IActionResult GetServicesStatus()
+    {
+        var services = new List<ServiceStatus>();
+        
+        // 检查 MySQL
+        CheckMySQLStatus(services);
+        
+        // 检查 Redis
+        CheckRedisStatus(services);
+        
+        // 检查 Docker
+        CheckDockerStatus(services);
+        
+        // 检查 Java
+        CheckJavaStatus(services);
+        
+        // 检查 Python
+        CheckPythonStatus(services);
+        
+        // 检查 Apache
+        CheckApacheStatus(services);
+        
+        return Json(services);
+    }
+
+    private void CheckMySQLStatus(List<ServiceStatus> services)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "mysql",
+                Arguments = "--version",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo);
+            var output = process?.StandardOutput.ReadToEnd();
+            process?.WaitForExit();
+
+            services.Add(new ServiceStatus
+            {
+                ServiceName = "MySQL",
+                Version = output?.Contains("Ver") == true ? Regex.Match(output, @"Ver \d+\.\d+\.\d+").Value : "未知",
+                IsRunning = process?.ExitCode == 0,
+                Status = process?.ExitCode == 0 ? "运行中" : "未运行",
+                LastChecked = DateTime.Now
+            });
+        }
+        catch
+        {
+            services.Add(new ServiceStatus
+            {
+                ServiceName = "MySQL",
+                Version = "未知",
+                IsRunning = false,
+                Status = "未安装",
+                LastChecked = DateTime.Now
+            });
+        }
+    }
+
+    private void CheckRedisStatus(List<ServiceStatus> services)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "redis-cli",
+                Arguments = "--version",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo);
+            var output = process?.StandardOutput.ReadToEnd();
+            process?.WaitForExit();
+
+            services.Add(new ServiceStatus
+            {
+                ServiceName = "Redis",
+                Version = output?.Trim() ?? "未知",
+                IsRunning = process?.ExitCode == 0,
+                Status = process?.ExitCode == 0 ? "运行中" : "未运行",
+                LastChecked = DateTime.Now
+            });
+        }
+        catch
+        {
+            services.Add(new ServiceStatus
+            {
+                ServiceName = "Redis",
+                Version = "未知",
+                IsRunning = false,
+                Status = "未安装",
+                LastChecked = DateTime.Now
+            });
+        }
+    }
+
+    private void CheckDockerStatus(List<ServiceStatus> services)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "docker",
+                Arguments = "--version",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo);
+            var output = process?.StandardOutput.ReadToEnd();
+            process?.WaitForExit();
+
+            services.Add(new ServiceStatus
+            {
+                ServiceName = "Docker",
+                Version = output?.Contains("version") == true ? Regex.Match(output, @"version \d+\.\d+\.\d+").Value : "未知",
+                IsRunning = process?.ExitCode == 0,
+                Status = process?.ExitCode == 0 ? "运行中" : "未运行",
+                LastChecked = DateTime.Now
+            });
+        }
+        catch
+        {
+            services.Add(new ServiceStatus
+            {
+                ServiceName = "Docker",
+                Version = "未知",
+                IsRunning = false,
+                Status = "未安装",
+                LastChecked = DateTime.Now
+            });
+        }
+    }
+
+    private void CheckJavaStatus(List<ServiceStatus> services)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "java",
+                Arguments = "-version",
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo);
+            var output = process?.StandardError.ReadToEnd();
+            process?.WaitForExit();
+
+            services.Add(new ServiceStatus
+            {
+                ServiceName = "Java",
+                Version = output?.Contains("version") == true ? Regex.Match(output, @"version ""\d+\.\d+\.\d+").Value : "未知",
+                IsRunning = process?.ExitCode == 0,
+                Status = process?.ExitCode == 0 ? "已安装" : "未安装",
+                LastChecked = DateTime.Now
+            });
+        }
+        catch
+        {
+            services.Add(new ServiceStatus
+            {
+                ServiceName = "Java",
+                Version = "未知",
+                IsRunning = false,
+                Status = "未安装",
+                LastChecked = DateTime.Now
+            });
+        }
+    }
+
+    private void CheckPythonStatus(List<ServiceStatus> services)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "python",
+                Arguments = "--version",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo);
+            var output = process?.StandardOutput.ReadToEnd();
+            process?.WaitForExit();
+
+            services.Add(new ServiceStatus
+            {
+                ServiceName = "Python",
+                Version = output?.Contains("Python") == true ? output.Trim() : "未知",
+                IsRunning = process?.ExitCode == 0,
+                Status = process?.ExitCode == 0 ? "已安装" : "未安装",
+                LastChecked = DateTime.Now
+            });
+        }
+        catch
+        {
+            services.Add(new ServiceStatus
+            {
+                ServiceName = "Python",
+                Version = "未知",
+                IsRunning = false,
+                Status = "未安装",
+                LastChecked = DateTime.Now
+            });
+        }
+    }
+
+    private void CheckApacheStatus(List<ServiceStatus> services)
+    {
+        try
+        {
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = "httpd",
+                Arguments = "-v",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(startInfo);
+            var output = process?.StandardOutput.ReadToEnd();
+            process?.WaitForExit();
+
+            services.Add(new ServiceStatus
+            {
+                ServiceName = "Apache",
+                Version = output?.Contains("version") == true ? Regex.Match(output, @"version: Apache/\d+\.\d+\.\d+").Value : "未知",
+                IsRunning = process?.ExitCode == 0,
+                Status = process?.ExitCode == 0 ? "运行中" : "未运行",
+                LastChecked = DateTime.Now
+            });
+        }
+        catch
+        {
+            services.Add(new ServiceStatus
+            {
+                ServiceName = "Apache",
+                Version = "未知",
+                IsRunning = false,
+                Status = "未安装",
+                LastChecked = DateTime.Now
+            });
+        }
     }
 
     public IActionResult Privacy()
