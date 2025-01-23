@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Localization;
 using MyWebApp.Models;
 using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
 
 namespace MyWebApp.Controllers;
 
@@ -70,18 +71,32 @@ public class HomeController : Controller
 
         try
         {
+            var mysqlCommand = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "mysql.exe" : "mysql";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                var fullPath = "/usr/local/bin/mysql";
+                if (System.IO.File.Exists(fullPath))
+                {
+                    mysqlCommand = fullPath;
+                }
+                else if (System.IO.File.Exists("/usr/bin/mysql"))
+                {
+                    mysqlCommand = "/usr/bin/mysql";
+                }
+            }
+
             var startInfo = new ProcessStartInfo
             {
-                FileName = "mysql",
+                FileName = mysqlCommand,
                 Arguments = "--version",
                 RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                RedirectStandardError = true,
+                UseShellExecute = false
             };
 
             using var process = Process.Start(startInfo);
-            var output = process?.StandardOutput.ReadToEnd();
-            process?.WaitForExit();
+            var output = process?.StandardOutput.ReadToEnd() ?? process?.StandardError.ReadToEnd();
+            process?.WaitForExit(3000); // 添加3秒超时
 
             if (process?.ExitCode == 0 && !string.IsNullOrEmpty(output))
             {
@@ -90,9 +105,9 @@ public class HomeController : Controller
                 isRunning = true;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // 命令不存在或执行失败
+            _logger.LogError(ex, "检查MySQL状态时出错");
         }
 
         services.Add(new ServiceStatus
@@ -112,18 +127,32 @@ public class HomeController : Controller
 
         try
         {
+            var redisCommand = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "redis-cli.exe" : "redis-cli";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                var fullPath = "/usr/local/bin/redis-cli";
+                if (System.IO.File.Exists(fullPath))
+                {
+                    redisCommand = fullPath;
+                }
+                else if (System.IO.File.Exists("/usr/bin/redis-cli"))
+                {
+                    redisCommand = "/usr/bin/redis-cli";
+                }
+            }
+
             var startInfo = new ProcessStartInfo
             {
-                FileName = "redis-cli",
+                FileName = redisCommand,
                 Arguments = "--version",
                 RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                RedirectStandardError = true,
+                UseShellExecute = false
             };
 
             using var process = Process.Start(startInfo);
-            var output = process?.StandardOutput.ReadToEnd();
-            process?.WaitForExit();
+            var output = process?.StandardOutput.ReadToEnd() ?? process?.StandardError.ReadToEnd();
+            process?.WaitForExit(3000);
 
             if (process?.ExitCode == 0 && !string.IsNullOrEmpty(output))
             {
@@ -131,9 +160,9 @@ public class HomeController : Controller
                 isRunning = true;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // 命令不存在或执行失败
+            _logger.LogError(ex, "检查Redis状态时出错");
         }
 
         services.Add(new ServiceStatus
@@ -153,18 +182,32 @@ public class HomeController : Controller
 
         try
         {
+            var dockerCommand = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "docker.exe" : "docker";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                var fullPath = "/usr/local/bin/docker";
+                if (System.IO.File.Exists(fullPath))
+                {
+                    dockerCommand = fullPath;
+                }
+                else if (System.IO.File.Exists("/usr/bin/docker"))
+                {
+                    dockerCommand = "/usr/bin/docker";
+                }
+            }
+
             var startInfo = new ProcessStartInfo
             {
-                FileName = "docker",
+                FileName = dockerCommand,
                 Arguments = "--version",
                 RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                RedirectStandardError = true,
+                UseShellExecute = false
             };
 
             using var process = Process.Start(startInfo);
-            var output = process?.StandardOutput.ReadToEnd();
-            process?.WaitForExit();
+            var output = process?.StandardOutput.ReadToEnd() ?? process?.StandardError.ReadToEnd();
+            process?.WaitForExit(3000);
 
             if (process?.ExitCode == 0 && !string.IsNullOrEmpty(output))
             {
@@ -173,9 +216,9 @@ public class HomeController : Controller
                 isRunning = true;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // 命令不存在或执行失败
+            _logger.LogError(ex, "检查Docker状态时出错");
         }
 
         services.Add(new ServiceStatus
@@ -195,18 +238,28 @@ public class HomeController : Controller
 
         try
         {
+            var javaCommand = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "java.exe" : "java";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                var fullPath = "/usr/bin/java";
+                if (System.IO.File.Exists(fullPath))
+                {
+                    javaCommand = fullPath;
+                }
+            }
+
             var startInfo = new ProcessStartInfo
             {
-                FileName = "java",
+                FileName = javaCommand,
                 Arguments = "-version",
+                RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                UseShellExecute = false
             };
 
             using var process = Process.Start(startInfo);
-            var output = process?.StandardError.ReadToEnd();
-            process?.WaitForExit();
+            var output = process?.StandardError.ReadToEnd() ?? process?.StandardOutput.ReadToEnd();
+            process?.WaitForExit(3000);
 
             if (process?.ExitCode == 0 && !string.IsNullOrEmpty(output))
             {
@@ -215,9 +268,9 @@ public class HomeController : Controller
                 isRunning = true;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // 命令不存在或执行失败
+            _logger.LogError(ex, "检查Java状态时出错");
         }
 
         services.Add(new ServiceStatus
@@ -234,25 +287,33 @@ public class HomeController : Controller
     {
         var version = "未知";
         var isRunning = false;
-        var pythonCommands = new[] { "python", "python3", "py" };
+        var pythonCommands = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) 
+            ? new[] { "python.exe", "python3.exe", "py.exe" }
+            : new[] { "python3", "python" };
 
         foreach (var cmd in pythonCommands)
         {
             try
             {
+                var pythonCommand = cmd;
+                if ((RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) 
+                    && System.IO.File.Exists($"/usr/bin/{cmd}"))
+                {
+                    pythonCommand = $"/usr/bin/{cmd}";
+                }
+
                 var startInfo = new ProcessStartInfo
                 {
-                    FileName = cmd,
+                    FileName = pythonCommand,
                     Arguments = "--version",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
+                    UseShellExecute = false
                 };
 
                 using var process = Process.Start(startInfo);
                 var output = process?.StandardOutput.ReadToEnd() ?? process?.StandardError.ReadToEnd();
-                process?.WaitForExit();
+                process?.WaitForExit(3000);
 
                 if (process?.ExitCode == 0 && !string.IsNullOrEmpty(output))
                 {
@@ -261,9 +322,9 @@ public class HomeController : Controller
                     break;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // 继续尝试下一个命令
+                _logger.LogError(ex, $"使用命令 {cmd} 检查Python状态时出错");
                 continue;
             }
         }
@@ -285,19 +346,31 @@ public class HomeController : Controller
 
         try
         {
+            var apacheCommand = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "httpd.exe" : "httpd";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                if (System.IO.File.Exists("/usr/sbin/httpd"))
+                {
+                    apacheCommand = "/usr/sbin/httpd";
+                }
+                else if (System.IO.File.Exists("/usr/sbin/apache2"))
+                {
+                    apacheCommand = "/usr/sbin/apache2";
+                }
+            }
+
             var startInfo = new ProcessStartInfo
             {
-                FileName = "httpd",
+                FileName = apacheCommand,
                 Arguments = "-v",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                UseShellExecute = false
             };
 
             using var process = Process.Start(startInfo);
             var output = process?.StandardOutput.ReadToEnd() ?? process?.StandardError.ReadToEnd();
-            process?.WaitForExit();
+            process?.WaitForExit(3000);
 
             if (process?.ExitCode == 0 && !string.IsNullOrEmpty(output))
             {
@@ -306,9 +379,9 @@ public class HomeController : Controller
                 isRunning = true;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // 命令不存在或执行失败
+            _logger.LogError(ex, "检查Apache状态时出错");
         }
 
         services.Add(new ServiceStatus
