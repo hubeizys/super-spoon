@@ -5,26 +5,31 @@ using MyWebApp.Models;
 
 namespace MyWebApp.Controllers;
 
-    public class HomeController : Controller
+public class HomeController : Controller
+{
+    private readonly ILogger<HomeController> _logger;
+
+    public HomeController(ILogger<HomeController> logger)
     {
-        private readonly ILogger<HomeController> _logger;
+        _logger = logger;
+    }
 
-        public HomeController(ILogger<HomeController> logger)
+    [HttpPost]
+    public IActionResult SetLanguage(string culture, string returnUrl)
+    {
+        if (string.IsNullOrEmpty(culture))
         {
-            _logger = logger;
+            culture = "en-US"; // 默认文化
         }
 
-        [HttpPost]
-        public IActionResult SetLanguage(string culture, string returnUrl)
-        {
-            Response.Cookies.Append(
-                CookieRequestCultureProvider.DefaultCookieName,
-                CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
-                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
-            );
+        Response.Cookies.Append(
+            CookieRequestCultureProvider.DefaultCookieName,
+            CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+            new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+        );
 
-            return LocalRedirect(returnUrl);
-        }
+        return LocalRedirect(!string.IsNullOrEmpty(returnUrl) ? returnUrl : "~/");
+    }
 
     public IActionResult Index()
     {
