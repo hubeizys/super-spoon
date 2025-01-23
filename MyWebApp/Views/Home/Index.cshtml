@@ -122,6 +122,8 @@
                 .then(response => response.json())
                 .then(services => {
                     const container = document.getElementById('services-container');
+                    // 日志输出
+                    console.log('获取服务状态成功:', services);
                     container.innerHTML = services.map(createServiceCard).join('');
                 })
                 .catch(error => console.error('获取服务状态失败:', error));
