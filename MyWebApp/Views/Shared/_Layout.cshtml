@@ -1,4 +1,7 @@
-﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -27,6 +30,7 @@
                                 <li>
                                     <form id="selectLanguage" asp-controller="Home" asp-action="SetLanguage" method="post">
                                         <input type="hidden" id="culture" name="culture" />
+                                        <input type="hidden" id="returnUrl" name="returnUrl" value="@Context.Request.Path" />
                                         <a class="dropdown-item" href="#" onclick="changeLanguage('en')">English</a>
                                         <a class="dropdown-item" href="#" onclick="changeLanguage('zh')">中文</a>
                                     </form>
@@ -61,6 +65,7 @@
     <script>
         function changeLanguage(culture) {
             document.getElementById('culture').value = culture;
+            document.getElementById('returnUrl').value = window.location.pathname + window.location.search;
             document.getElementById('selectLanguage').submit();
         }
     </script>
