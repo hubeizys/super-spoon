@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Localization" Version="2.3.0" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.11" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
   </ItemGroup>
 
 </Project>

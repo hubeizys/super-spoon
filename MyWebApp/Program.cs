@@ -1,4 +1,12 @@
+using Serilog;
+using Serilog.Events;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// 配置 Serilog
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services));
 
 // Add services to the container.
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
