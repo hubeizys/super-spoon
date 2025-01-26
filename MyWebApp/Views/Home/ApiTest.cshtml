@@ -60,6 +60,8 @@ function sendRequest() {
         document.getElementById('response').textContent = JSON.stringify(data, null, 2);
     })
     .catch(error => {
+        //存入日志
+        console.error(error);
         document.getElementById('response').textContent = 'Error: ' + error.message;
     });
 }

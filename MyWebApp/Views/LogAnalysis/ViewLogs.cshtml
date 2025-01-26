@@ -1,0 +1,96 @@
+@{
+    ViewData["Title"] = "Log Viewer";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid vh-100 d-flex flex-column">
+    <div class="row flex-grow-0 py-3">
+        <div class="col">
+            <form id="streamLogForm" class="mb-0">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="streamLogPath" placeholder="Enter log file path" required>
+                    <button class="btn btn-primary" type="submit">Start Streaming</button>
+                    <button class="btn btn-danger" type="button" id="stopStreaming" disabled>Stop</button>
+                    <button class="btn btn-secondary" type="button" id="clearLog">Clear</button>
+                    <div class="input-group-text">
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="autoScroll" checked>
+                            <label class="form-check-label" for="autoScroll">Auto-scroll</label>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row flex-grow-1">
+        <div class="col">
+            <pre id="logStream" class="bg-dark text-light p-3 h-100" style="overflow-y: auto; margin: 0;"></pre>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let streamingInterval;
+        let lastPosition = 0;
+        let autoScroll = true;
+
+        function appendToLogStream(content) {
+            const logStream = document.getElementById('logStream');
+            logStream.textContent += content;
+            if (autoScroll) {
+                logStream.scrollTop = logStream.scrollHeight;
+            }
+        }
+
+        async function streamLog(logPath) {
+            try {
+                const response = await fetch(`/LogAnalysis/StreamLog?logPath=${encodeURIComponent(logPath)}&lastPosition=${lastPosition}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    appendToLogStream(`Error: ${data.error}\n`);
+                    return false;
+                }
+
+                if (data.content) {
+                    appendToLogStream(data.content);
+                    lastPosition = data.position;
+                }
+
+                return true;
+            } catch (error) {
+                appendToLogStream(`Error: ${error.message}\n`);
+                return false;
+            }
+        }
+
+        document.getElementById('streamLogForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const logPath = document.getElementById('streamLogPath').value;
+            document.getElementById('logStream').textContent = '';
+            lastPosition = 0;
+            
+            document.getElementById('stopStreaming').disabled = false;
+            
+            // Initial stream
+            if (await streamLog(logPath)) {
+                // Continue streaming every second
+                streamingInterval = setInterval(() => streamLog(logPath), 1000);
+            }
+        });
+
+        document.getElementById('stopStreaming').addEventListener('click', function() {
+            clearInterval(streamingInterval);
+            this.disabled = true;
+        });
+
+        document.getElementById('clearLog').addEventListener('click', function() {
+            document.getElementById('logStream').textContent = '';
+        });
+
+        document.getElementById('autoScroll').addEventListener('change', function() {
+            autoScroll = this.checked;
+        });
+    </script>
+}
