@@ -1,0 +1,25 @@
+{
+  "Services": [
+    {
+      "Name": "MySQL",
+      "Type": "Process",
+      "Command": {
+        "Windows": "mysql.exe",
+        "Linux": "/usr/bin/mysql",
+        "OSX": "/usr/local/bin/mysql"
+      },
+      "VersionArgs": "--version",
+      "VersionPattern": "Ver \\d+\\.\\d+\\.\\d+"
+    },
+    {
+      "Name": "Redis",
+      "Type": "Process",
+      "Command": {
+        "Windows": "redis-cli.exe",
+        "Linux": "/usr/bin/redis-cli",
+        "OSX": "/usr/local/bin/redis-cli"
+      },
+      "VersionArgs": "--version"
+    }
+  ]
+}

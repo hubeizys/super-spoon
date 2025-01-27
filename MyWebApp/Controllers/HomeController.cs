@@ -10,10 +10,12 @@ namespace MyWebApp.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly ServiceManager _serviceManager;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, ServiceManager serviceManager)
     {
         _logger = logger;
+        _serviceManager = serviceManager;
     }
 
     [HttpPost]
@@ -39,28 +41,9 @@ public class HomeController : Controller
     }
 
     [HttpGet]
-    public IActionResult GetServicesStatus()
+    public async Task<IActionResult> GetServicesStatus()
     {
-        var services = new List<ServiceStatus>();
-        
-        // 检查 MySQL
-        CheckMySQLStatus(services);
-        
-        // 检查 Redis
-        CheckRedisStatus(services);
-        
-        // 检查 Docker
-        CheckDockerStatus(services);
-        
-        // 检查 Java
-        CheckJavaStatus(services);
-        
-        // 检查 Python
-        CheckPythonStatus(services);
-        
-        // 检查 Apache
-        CheckApacheStatus(services);
-        
+        var services = await _serviceManager.CheckAllServices();
         return Json(services);
     }
 
@@ -394,15 +377,15 @@ public class HomeController : Controller
         });
     }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+    public IActionResult Privacy()
+    {
+        return View();
+    }
 
-        public IActionResult ApiTest()
-        {
-            return View();
-        }
+    public IActionResult ApiTest()
+    {
+        return View();
+    }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
