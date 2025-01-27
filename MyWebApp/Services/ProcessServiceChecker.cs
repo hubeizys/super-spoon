@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MyWebApp.Models;
@@ -35,12 +36,27 @@ namespace MyWebApp.Services
                 };
 
                 using var process = Process.Start(startInfo);
+                if (process == null)
+                {
+                    _logger.LogError($"无法启动进程 {command}");
+                    return new ServiceStatus
+                    {
+                        ServiceName = config.Name,
+                        Version = "未知",
+                        IsRunning = false,
+                        Status = "启动失败",
+                        LastChecked = DateTime.Now
+                    };
+                }
+
                 var output = await process.StandardOutput.ReadToEndAsync();
                 if (string.IsNullOrEmpty(output))
                 {
                     output = await process.StandardError.ReadToEndAsync();
                 }
-                await process.WaitForExitAsync(TimeSpan.FromSeconds(3));
+                
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+                await process.WaitForExitAsync(cts.Token);
 
                 if (process.ExitCode == 0 && !string.IsNullOrEmpty(output))
                 {
@@ -75,7 +91,7 @@ namespace MyWebApp.Services
             throw new PlatformNotSupportedException();
         }
 
-        private string ParseVersion(string output, string pattern)
+        private string ParseVersion(string output, string? pattern)
         {
             if (string.IsNullOrEmpty(pattern))
                 return output.Trim();

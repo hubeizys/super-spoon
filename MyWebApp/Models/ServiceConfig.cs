@@ -2,17 +2,17 @@ namespace MyWebApp.Models
 {
     public class ServiceConfig
     {
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public CommandConfig Command { get; set; }
-        public string VersionArgs { get; set; }
-        public string VersionPattern { get; set; }
+        public required string Name { get; set; }
+        public required string Type { get; set; }
+        public required CommandConfig Command { get; set; }
+        public required string VersionArgs { get; set; }
+        public string? VersionPattern { get; set; }
     }
 
     public class CommandConfig
     {
-        public string Windows { get; set; }
-        public string Linux { get; set; }
-        public string OSX { get; set; }
+        public required string Windows { get; set; }
+        public required string Linux { get; set; }
+        public required string OSX { get; set; }
     }
 }

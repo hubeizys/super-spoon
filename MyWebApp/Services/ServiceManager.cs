@@ -60,6 +60,6 @@ namespace MyWebApp.Services
 
     public class ServicesConfig
     {
-        public List<ServiceConfig> Services { get; set; }
+        public required List<ServiceConfig> Services { get; set; }
     }
 }
