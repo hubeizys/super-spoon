@@ -13,6 +13,8 @@ namespace MyWebApp.Services
     {
         private readonly ILogger<ProcessServiceChecker> _logger;
 
+        public string ServiceType => "Process";
+
         public ProcessServiceChecker(ILogger<ProcessServiceChecker> logger)
         {
             _logger = logger;

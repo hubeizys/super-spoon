@@ -1,5 +1,6 @@
 using Serilog;
 using Serilog.Events;
+using MyWebApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,10 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 
 // Add services to the container.
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+// 注册服务
+builder.Services.AddScoped<IServiceChecker, ProcessServiceChecker>();
+builder.Services.AddScoped<ServiceManager>();
+
 builder.Services.AddControllersWithViews()
     .AddViewLocalization();
 
@@ -36,6 +41,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

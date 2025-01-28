@@ -55,14 +55,27 @@ function sendRequest() {
         headers: headers,
         body: method !== 'GET' ? body : null
     })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+    .then(async response => {
+        const responseDiv = document.getElementById('response');
+        responseDiv.innerHTML = `Status: ${response.status} ${response.statusText}\n\n`;
+        
+        try {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+                responseDiv.textContent += JSON.stringify(data, null, 2);
+            } else {
+                const text = await response.text();
+                responseDiv.textContent += text;
+            }
+        } catch (error) {
+            console.error('Response parsing error:', error);
+            responseDiv.textContent += `Error parsing response: ${error.message}`;
+        }
     })
     .catch(error => {
-        //存入日志
-        console.error(error);
-        document.getElementById('response').textContent = 'Error: ' + error.message;
+        console.error('Request error:', error);
+        document.getElementById('response').textContent = `Request failed: ${error.message}`;
     });
 }
 

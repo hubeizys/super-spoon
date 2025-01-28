@@ -5,6 +5,7 @@ namespace MyWebApp.Services
 {
     public interface IServiceChecker
     {
+        string ServiceType { get; }
         Task<ServiceStatus> CheckStatus(ServiceConfig config);
     }
 }

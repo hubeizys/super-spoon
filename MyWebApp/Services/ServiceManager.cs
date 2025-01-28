@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System.IO;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using MyWebApp.Models;
 
@@ -13,13 +15,10 @@ namespace MyWebApp.Services
         private readonly Dictionary<string, IServiceChecker> _checkers;
         private readonly List<ServiceConfig> _services;
 
-        public ServiceManager(ILogger<ServiceManager> logger, ProcessServiceChecker processChecker)
+        public ServiceManager(ILogger<ServiceManager> logger, IEnumerable<IServiceChecker> checkers)
         {
             _logger = logger;
-            _checkers = new Dictionary<string, IServiceChecker>
-            {
-                { "Process", processChecker }
-            };
+            _checkers = checkers.ToDictionary(c => c.ServiceType);
             _services = LoadServiceConfigs();
         }
 
