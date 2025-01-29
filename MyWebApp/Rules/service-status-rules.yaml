@@ -1,0 +1,50 @@
+# 服务状态检查规则
+rules:
+  - name: "MySQL状态检查规则"
+    service: "MySQL"
+    conditions:
+      - type: "version"
+        operator: "regex"
+        pattern: "Ver \\d+\\.\\d+\\.\\d+"
+        message: "MySQL版本格式不正确"
+      - type: "status"
+        operator: "equals"
+        value: "运行中"
+        message: "MySQL服务未在运行"
+    severity: "error"
+    
+  - name: "Redis状态检查规则"
+    service: "Redis"
+    conditions:
+      - type: "version"
+        operator: "not_empty"
+        message: "无法获取Redis版本信息"
+      - type: "status"
+        operator: "equals"
+        value: "运行中"
+        message: "Redis服务未在运行"
+    severity: "warning"
+
+  - name: "Docker运行状态规则"
+    service: "Docker"
+    conditions:
+      - type: "version"
+        operator: "regex"
+        pattern: "version \\d+\\.\\d+\\.\\d+"
+        message: "Docker版本格式不正确"
+      - type: "isRunning"
+        operator: "equals"
+        value: true
+        message: "Docker服务未在运行"
+    severity: "error"
+
+actions:
+  - name: "发送邮件通知"
+    type: "email"
+    trigger: "error"
+    template: "服务 {ServiceName} 出现异常：{Message}"
+    
+  - name: "记录日志"
+    type: "log"
+    trigger: "any"
+    format: "[{Severity}] {ServiceName}: {Message}" 
