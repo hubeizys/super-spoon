@@ -1,4 +1,4 @@
-@model MyWebApp.Models.Task
+@model MyWebApp.Models.SpoonTaskModel
 @{
     ViewData["Title"] = "编辑任务";
 }
@@ -36,7 +36,7 @@
 
         <div class="form-group">
             <label asp-for="Status" class="control-label"></label>
-            <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<TaskStatus>()"></select>
+            <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<SpoonTaskStatus>()"></select>
             <span asp-validation-for="Status" class="text-danger"></span>
         </div>
 

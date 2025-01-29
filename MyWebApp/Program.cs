@@ -19,7 +19,14 @@ builder.Services.AddScoped<ServiceManager>();
 
 // 添加数据库服务
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+    }
+    options.UseSqlite(connectionString);
+});
 
 builder.Services.AddControllersWithViews()
     .AddViewLocalization();

@@ -3,16 +3,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MyWebApp.Models
 {
-    public class Task
+    public class SpoonTaskModel
     {
         public int Id { get; set; }
 
         [Required(ErrorMessage = "任务标题不能为空")]
         [Display(Name = "任务标题")]
-        public string Title { get; set; }
+        public required string Title { get; set; }
 
         [Display(Name = "任务描述")]
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
         [Display(Name = "截止时间")]
         [DataType(DataType.DateTime)]
@@ -22,14 +22,14 @@ namespace MyWebApp.Models
         public Priority Priority { get; set; }
 
         [Display(Name = "任务状态")]
-        public TaskStatus Status { get; set; }
+        public SpoonTaskStatus Status { get; set; }
 
         [Display(Name = "提醒时间")]
         public DateTime? RemindTime { get; set; }
 
         [Display(Name = "所属项目")]
         public int? ProjectId { get; set; }
-        public virtual Project Project { get; set; }
+        public SpoonProjectModel? Project { get; set; }
 
         [Display(Name = "创建时间")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
@@ -50,15 +50,5 @@ namespace MyWebApp.Models
         Urgent
     }
 
-    public enum TaskStatus
-    {
-        [Display(Name = "待处理")]
-        Pending,
-        [Display(Name = "进行中")]
-        InProgress,
-        [Display(Name = "已完成")]
-        Completed,
-        [Display(Name = "已取消")]
-        Cancelled
-    }
+
 } 

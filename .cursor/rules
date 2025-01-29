@@ -5,6 +5,9 @@ This is a.NET Core MVC project using C#.
 Use PascalCase for class, method, and property names.
 Use camelCase for local variables and method parameters.
 Indent code with 4 spaces.
+Use Serilog for logging.
+class name should add "Model" suffix.
+model name should add "Model" suffix.
 
 # 项目结构规则
 Controllers are stored in the 'Controllers' directory.

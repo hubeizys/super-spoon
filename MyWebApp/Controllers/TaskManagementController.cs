@@ -60,11 +60,11 @@ namespace MyWebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Description,DueDate,Priority,ProjectId,RemindTime")] Models.Task task)
+        public async Task<IActionResult> Create([Bind("Title,Description,DueDate,Priority,ProjectId,RemindTime")] Models.SpoonTaskModel task)
         {
             if (ModelState.IsValid)
             {
-                task.Status = TaskStatus.Pending;
+                task.Status = MyWebApp.Models.SpoonTaskStatus.Pending;
                 task.CreatedAt = DateTime.Now;
                 task.UpdatedAt = DateTime.Now;
                 _context.Add(task);
@@ -94,7 +94,7 @@ namespace MyWebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,DueDate,Priority,Status,ProjectId,RemindTime")] Models.Task task)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,DueDate,Priority,Status,ProjectId,RemindTime")] Models.SpoonTaskModel task)
         {
             if (id != task.Id)
             {

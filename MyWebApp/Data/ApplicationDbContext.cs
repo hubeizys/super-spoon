@@ -10,15 +10,15 @@ namespace MyWebApp.Data
         {
         }
 
-        public DbSet<Task> Tasks { get; set; }
-        public DbSet<Project> Projects { get; set; }
+        public required DbSet<SpoonTaskModel> Tasks { get; set; }
+        public required DbSet<SpoonProjectModel> Projects { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             // 配置Task和Project之间的关系
-            modelBuilder.Entity<Task>()
+            modelBuilder.Entity<SpoonTaskModel>()
                 .HasOne(t => t.Project)
                 .WithMany(p => p.Tasks)
                 .HasForeignKey(t => t.ProjectId)
