@@ -1,4 +1,4 @@
-﻿﻿﻿@using Microsoft.AspNetCore.Mvc.Localization
+﻿﻿@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
 
 <!DOCTYPE html>
@@ -50,6 +50,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">@Localizer["Privacy"]</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="TaskManagement" asp-action="Index">任务管理</a>
                         </li>
                     </ul>
                 </div>

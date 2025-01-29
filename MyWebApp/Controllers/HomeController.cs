@@ -391,6 +391,11 @@ public class HomeController : Controller
         return View();
     }
 
+    public IActionResult TaskManagement()
+    {
+        return RedirectToAction("Index", "TaskManagement");
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

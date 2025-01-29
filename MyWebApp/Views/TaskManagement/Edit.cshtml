@@ -1,0 +1,66 @@
+@model MyWebApp.Models.Task
+@{
+    ViewData["Title"] = "编辑任务";
+}
+
+<div class="container">
+    <h2>编辑任务</h2>
+
+    <form asp-action="Edit">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Id" />
+        
+        <div class="form-group">
+            <label asp-for="Title" class="control-label"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Description" class="control-label"></label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="DueDate" class="control-label"></label>
+            <input asp-for="DueDate" class="form-control" type="datetime-local" />
+            <span asp-validation-for="DueDate" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Priority" class="control-label"></label>
+            <select asp-for="Priority" class="form-control" asp-items="Html.GetEnumSelectList<Priority>()"></select>
+            <span asp-validation-for="Priority" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Status" class="control-label"></label>
+            <select asp-for="Status" class="form-control" asp-items="Html.GetEnumSelectList<TaskStatus>()"></select>
+            <span asp-validation-for="Status" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="ProjectId" class="control-label"></label>
+            <select asp-for="ProjectId" class="form-control" 
+                    asp-items="@(new SelectList(ViewBag.Projects, "Id", "Name"))">
+                <option value="">-- 选择项目 --</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="RemindTime" class="control-label"></label>
+            <input asp-for="RemindTime" class="form-control" type="datetime-local" />
+            <span asp-validation-for="RemindTime" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mt-3">
+            <input type="submit" value="保存" class="btn btn-primary" />
+            <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

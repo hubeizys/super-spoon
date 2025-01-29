@@ -1,0 +1,62 @@
+@model IEnumerable<MyWebApp.Models.Task>
+@{
+    ViewData["Title"] = "任务管理";
+}
+
+<div class="container">
+    <h2>任务管理</h2>
+
+    <p>
+        <a asp-action="Create" class="btn btn-primary">创建新任务</a>
+    </p>
+
+    <div class="mb-3">
+        <form asp-action="Index" method="get" class="form-inline">
+            <div class="input-group">
+                <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="搜索任务..."/>
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-outline-secondary">搜索</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">标题</a>
+                </th>
+                <th>项目</th>
+                <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["DateSortParm"]">截止日期</a>
+                </th>
+                <th>优先级</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Title</td>
+                    <td>@(item.Project?.Name ?? "无项目")</td>
+                    <td>@(item.DueDate?.ToString("yyyy-MM-dd HH:mm") ?? "无截止日期")</td>
+                    <td>
+                        <span class="badge @(item.Priority switch {
+                            Priority.Urgent => "bg-danger",
+                            Priority.High => "bg-warning",
+                            Priority.Medium => "bg-info",
+                            _ => "bg-secondary"
+                        })">@item.Priority</span>
+                    </td>
+                    <td>@item.Status</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">编辑</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div> 

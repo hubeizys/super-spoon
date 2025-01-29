@@ -1,6 +1,8 @@
 using Serilog;
 using Serilog.Events;
 using MyWebApp.Services;
+using Microsoft.EntityFrameworkCore;
+using MyWebApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,10 @@ builder.Services.AddLocalization(options => options.ResourcesPath = "Resources")
 // 注册服务
 builder.Services.AddScoped<IServiceChecker, ProcessServiceChecker>();
 builder.Services.AddScoped<ServiceManager>();
+
+// 添加数据库服务
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllersWithViews()
     .AddViewLocalization();
