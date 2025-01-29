@@ -1,6 +1,249 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "实用工具集";
 }
 <h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="container">
+    <div class="row">
+        <!-- JSON 查看器 -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">JSON 格式化工具</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <textarea id="jsonInput" class="form-control" rows="10" placeholder="请输入JSON文本..."></textarea>
+                    </div>
+                    <button class="btn btn-primary mt-2" onclick="formatJson()">格式化</button>
+                    <button class="btn btn-secondary mt-2" onclick="clearJson()">清空</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unix时间戳转换器 -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Unix时间戳转换器</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Unix时间戳</label>
+                        <input type="number" id="timestamp" class="form-control" placeholder="请输入Unix时间戳...">
+                    </div>
+                    <button class="btn btn-primary mt-2" onclick="convertTimestamp()">转换</button>
+                    <div class="mt-3">
+                        <strong>转换结果：</strong>
+                        <div id="timestampResult"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Base64编解码器 -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Base64 编解码器</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>输入文本</label>
+                        <textarea id="base64Input" class="form-control" rows="5" placeholder="请输入要编码或解码的文本..."></textarea>
+                    </div>
+                    <button class="btn btn-primary mt-2" onclick="base64Encode()">编码</button>
+                    <button class="btn btn-info mt-2" onclick="base64Decode()">解码</button>
+                    <button class="btn btn-secondary mt-2" onclick="clearBase64()">清空</button>
+                    <div class="mt-3">
+                        <strong>结果：</strong>
+                        <textarea id="base64Result" class="form-control" rows="5" readonly></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- URL编解码器 -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">URL 编解码器</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>输入URL</label>
+                        <textarea id="urlInput" class="form-control" rows="5" placeholder="请输入要编码或解码的URL..."></textarea>
+                    </div>
+                    <button class="btn btn-primary mt-2" onclick="urlEncode()">编码</button>
+                    <button class="btn btn-info mt-2" onclick="urlDecode()">解码</button>
+                    <button class="btn btn-secondary mt-2" onclick="clearUrl()">清空</button>
+                    <div class="mt-3">
+                        <strong>结果：</strong>
+                        <textarea id="urlResult" class="form-control" rows="5" readonly></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 哈希计算器 -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">哈希计算器</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>输入文本</label>
+                        <textarea id="hashInput" class="form-control" rows="5" placeholder="请输入要计算哈希的文本..."></textarea>
+                    </div>
+                    <button class="btn btn-primary mt-2" onclick="calculateMD5()">计算MD5</button>
+                    <button class="btn btn-info mt-2" onclick="calculateSHA1()">计算SHA1</button>
+                    <button class="btn btn-secondary mt-2" onclick="clearHash()">清空</button>
+                    <div class="mt-3">
+                        <strong>结果：</strong>
+                        <input type="text" id="hashResult" class="form-control" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RGB颜色选择器 -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">RGB颜色选择器</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>选择颜色</label>
+                        <input type="color" id="colorPicker" class="form-control" style="height: 50px;">
+                    </div>
+                    <div class="mt-3">
+                        <strong>颜色值：</strong>
+                        <div class="row">
+                            <div class="col">
+                                <label>HEX</label>
+                                <input type="text" id="hexColor" class="form-control" readonly>
+                            </div>
+                            <div class="col">
+                                <label>RGB</label>
+                                <input type="text" id="rgbColor" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        function formatJson() {
+            try {
+                const input = document.getElementById('jsonInput').value;
+                const obj = JSON.parse(input);
+                document.getElementById('jsonInput').value = JSON.stringify(obj, null, 2);
+            } catch (e) {
+                alert('无效的JSON格式：' + e.message);
+            }
+        }
+
+        function clearJson() {
+            document.getElementById('jsonInput').value = '';
+        }
+
+        function convertTimestamp() {
+            const timestamp = document.getElementById('timestamp').value;
+            if (!timestamp) {
+                alert('请输入时间戳');
+                return;
+            }
+
+            const date = new Date(timestamp * 1000);
+            const result = `
+                本地时间：${date.toLocaleString()}<br>
+                UTC时间：${date.toUTCString()}<br>
+                ISO格式：${date.toISOString()}
+            `;
+            document.getElementById('timestampResult').innerHTML = result;
+        }
+
+        // Base64相关函数
+        function base64Encode() {
+            const input = document.getElementById('base64Input').value;
+            try {
+                const encoded = btoa(unescape(encodeURIComponent(input)));
+                document.getElementById('base64Result').value = encoded;
+            } catch (e) {
+                alert('编码失败：' + e.message);
+            }
+        }
+
+        function base64Decode() {
+            const input = document.getElementById('base64Input').value;
+            try {
+                const decoded = decodeURIComponent(escape(atob(input)));
+                document.getElementById('base64Result').value = decoded;
+            } catch (e) {
+                alert('解码失败：' + e.message);
+            }
+        }
+
+        function clearBase64() {
+            document.getElementById('base64Input').value = '';
+            document.getElementById('base64Result').value = '';
+        }
+
+        // URL编解码相关函数
+        function urlEncode() {
+            const input = document.getElementById('urlInput').value;
+            document.getElementById('urlResult').value = encodeURIComponent(input);
+        }
+
+        function urlDecode() {
+            const input = document.getElementById('urlInput').value;
+            try {
+                document.getElementById('urlResult').value = decodeURIComponent(input);
+            } catch (e) {
+                alert('解码失败：' + e.message);
+            }
+        }
+
+        function clearUrl() {
+            document.getElementById('urlInput').value = '';
+            document.getElementById('urlResult').value = '';
+        }
+
+        // 哈希计算相关函数
+        function calculateMD5() {
+            const input = document.getElementById('hashInput').value;
+            const hash = CryptoJS.MD5(input).toString();
+            document.getElementById('hashResult').value = hash;
+        }
+
+        function calculateSHA1() {
+            const input = document.getElementById('hashInput').value;
+            const hash = CryptoJS.SHA1(input).toString();
+            document.getElementById('hashResult').value = hash;
+        }
+
+        function clearHash() {
+            document.getElementById('hashInput').value = '';
+            document.getElementById('hashResult').value = '';
+        }
+
+        // RGB颜色选择器相关函数
+        document.getElementById('colorPicker').addEventListener('input', function(e) {
+            const color = e.target.value;
+            document.getElementById('hexColor').value = color;
+            
+            // 转换HEX为RGB
+            const r = parseInt(color.substr(1,2), 16);
+            const g = parseInt(color.substr(3,2), 16);
+            const b = parseInt(color.substr(5,2), 16);
+            document.getElementById('rgbColor').value = `rgb(${r}, ${g}, ${b})`;
+        });
+    </script>
+}
