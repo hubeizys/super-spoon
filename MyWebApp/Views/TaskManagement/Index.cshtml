@@ -4,59 +4,317 @@
 }
 
 <div class="container">
-    <h2>任务管理</h2>
-
-    <p>
-        <a asp-action="Create" class="btn btn-primary">创建新任务</a>
-    </p>
-
-    <div class="mb-3">
-        <form asp-action="Index" method="get" class="form-inline">
-            <div class="input-group">
-                <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="搜索任务..."/>
-                <div class="input-group-append">
-                    <button type="submit" class="btn btn-outline-secondary">搜索</button>
+    <div class="row">
+        <!-- 项目管理部分 -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h4>项目管理</h4>
+                </div>
+                <div class="card-body">
+                    <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+                        创建项目
+                    </button>
+                    <div class="list-group">
+                        <a href="#" class="list-group-item list-group-item-action active" onclick="filterByProject(null)">所有项目</a>
+                        @foreach (var project in ViewBag.Projects as List<MyWebApp.Models.SpoonProjectModel>)
+                        {
+                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <a href="#" onclick="filterByProject(@project.Id)" class="text-decoration-none flex-grow-1">@project.Name</a>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editProject(@project.Id, '@project.Name', '@project.Description')">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteProject(@project.Id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
-        </form>
-    </div>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">标题</a>
-                </th>
-                <th>项目</th>
-                <th>
-                    <a asp-action="Index" asp-route-sortOrder="@ViewData["DateSortParm"]">截止日期</a>
-                </th>
-                <th>优先级</th>
-                <th>状态</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.Title</td>
-                    <td>@(item.Project?.Name ?? "无项目")</td>
-                    <td>@(item.DueDate?.ToString("yyyy-MM-dd HH:mm") ?? "无截止日期")</td>
-                    <td>
-                        <span class="badge @(item.Priority switch {
-                            Priority.Urgent => "bg-danger",
-                            Priority.High => "bg-warning",
-                            Priority.Medium => "bg-info",
-                            _ => "bg-secondary"
-                        })">@item.Priority</span>
-                    </td>
-                    <td>@item.Status</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">编辑</a>
-                    </td>
-                </tr>
+        <!-- 任务管理部分 -->
+        <div class="col-md-9">
+            <h2>任务管理</h2>
+
+            <p>
+                <a asp-action="Create" class="btn btn-primary">创建新任务</a>
+            </p>
+
+            <div class="card mb-3">
+                <div class="card-body">
+                    <form asp-action="Index" method="get" id="searchForm">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control" placeholder="搜索任务标题..."/>
+                            </div>
+                            <div class="col-md-3">
+                                <select name="priority" class="form-select" onchange="document.getElementById('searchForm').submit()">
+                                    <option value="">所有优先级</option>
+                                    @foreach (var priority in Enum.GetValues(typeof(Priority)))
+                                    {
+                                        <option value="@priority" @(ViewData["CurrentPriority"]?.ToString() == priority.ToString() ? "selected" : "")>@priority</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select name="status" class="form-select" onchange="document.getElementById('searchForm').submit()">
+                                    <option value="">所有状态</option>
+                                    @foreach (var status in Enum.GetValues(typeof(SpoonTaskStatus)))
+                                    {
+                                        <option value="@status" @(ViewData["CurrentStatus"]?.ToString() == status.ToString() ? "selected" : "")>@status</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">搜索</button>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="showOverdue" value="true" id="showOverdue" @(ViewData["ShowOverdue"]?.ToString() == "True" ? "checked" : "")>
+                                    <label class="form-check-label" for="showOverdue">显示已逾期</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="showUpcoming" value="true" id="showUpcoming" @(ViewData["ShowUpcoming"]?.ToString() == "True" ? "checked" : "")>
+                                    <label class="form-check-label" for="showUpcoming">显示即将到期</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">标题</a>
+                        </th>
+                        <th>项目</th>
+                        <th>
+                            <a asp-action="Index" asp-route-sortOrder="@ViewData["DateSortParm"]">截止日期</a>
+                        </th>
+                        <th>优先级</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Title</td>
+                            <td>@(item.Project?.Name ?? "无项目")</td>
+                            <td>
+                                @if (item.DueDate.HasValue)
+                                {
+                                    var dueDate = item.DueDate.Value;
+                                    var isOverdue = dueDate < DateTime.Now;
+                                    var isUpcoming = dueDate > DateTime.Now && dueDate < DateTime.Now.AddDays(3);
+                                    <span class="@(isOverdue ? "text-danger" : isUpcoming ? "text-warning" : "")">
+                                        @dueDate.ToString("yyyy-MM-dd HH:mm")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>无截止日期</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge @(item.Priority switch {
+                                    Priority.Urgent => "bg-danger",
+                                    Priority.High => "bg-warning",
+                                    Priority.Medium => "bg-info",
+                                    _ => "bg-secondary"
+                                })">@item.Priority</span>
+                            </td>
+                            <td>@item.Status</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">编辑</a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteTask(@item.Id)">删除</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 创建项目模态框 -->
+<div class="modal fade" id="createProjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">创建新项目</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createProjectForm">
+                    <div class="mb-3">
+                        <label for="projectName" class="form-label">项目名称</label>
+                        <input type="text" class="form-control" id="projectName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="projectDescription" class="form-label">项目描述</label>
+                        <textarea class="form-control" id="projectDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="createProject()">创建</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑项目模态框 -->
+<div class="modal fade" id="editProjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">编辑项目</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProjectForm">
+                    <input type="hidden" id="editProjectId">
+                    <div class="mb-3">
+                        <label for="editProjectName" class="form-label">项目名称</label>
+                        <input type="text" class="form-control" id="editProjectName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProjectDescription" class="form-label">项目描述</label>
+                        <textarea class="form-control" id="editProjectDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="updateProject()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterByProject(projectId) {
+            const url = new URL(window.location.href);
+            if (projectId) {
+                url.searchParams.set('projectId', projectId);
+            } else {
+                url.searchParams.delete('projectId');
             }
-        </tbody>
-    </table>
-</div> 
+            window.location.href = url.toString();
+        }
+
+        async function createProject() {
+            const name = document.getElementById('projectName').value;
+            const description = document.getElementById('projectDescription').value;
+            
+            try {
+                const response = await fetch('/TaskManagement/CreateProject', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ name, description })
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('创建项目失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('创建项目失败');
+            }
+        }
+
+        function editProject(id, name, description) {
+            document.getElementById('editProjectId').value = id;
+            document.getElementById('editProjectName').value = name;
+            document.getElementById('editProjectDescription').value = description;
+            new bootstrap.Modal(document.getElementById('editProjectModal')).show();
+        }
+
+        async function updateProject() {
+            const id = document.getElementById('editProjectId').value;
+            const name = document.getElementById('editProjectName').value;
+            const description = document.getElementById('editProjectDescription').value;
+            
+            try {
+                const response = await fetch('/TaskManagement/UpdateProject', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ id, name, description })
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('更新项目失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('更新项目失败');
+            }
+        }
+
+        async function deleteProject(id) {
+            if (!confirm('确定要删除这个项目吗？')) return;
+            
+            try {
+                const response = await fetch(`/TaskManagement/DeleteProject/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('删除项目失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('删除项目失败');
+            }
+        }
+
+        async function deleteTask(id) {
+            if (!confirm('确定要删除这个任务吗？')) return;
+            
+            try {
+                const response = await fetch(`/TaskManagement/DeleteTask/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('删除任务失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('删除任务失败');
+            }
+        }
+    </script>
+} 
